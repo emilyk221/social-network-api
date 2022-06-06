@@ -60,6 +60,13 @@ router.put('/:id', ({ params, body }, res) => {
 // delete a user
 router.delete('/:id', ({ params }, res) => {
   User.findOneAndDelete({ _id: params.id })
+    .then(deletedUser => {
+      if (!deletedUser) {
+        return res.status(404).json({ message: 'No user found with this id!' });
+      }
+      return Thought.deleteMany(
+        { username: deletedUser.username });
+    })
     .then(dbUserData => {
       if (!dbUserData) {
         res.status(404).json({ message: 'No user found with this id!' });
