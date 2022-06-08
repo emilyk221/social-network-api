@@ -4,10 +4,6 @@ const { User, Thought } = require("../../models");
 // get all users
 router.get('/', (req, res) => {
   User.find({})
-    .populate({
-      path: 'thoughts',
-      select: '-__v'
-    })
     .select('-__v')
     .then(dbUserData => res.json(dbUserData))
     .catch(err => {
@@ -21,6 +17,10 @@ router.get('/:id', (req, res) => {
   User.findOne({ _id: req.params.id })
     .populate({
       path: 'thoughts',
+      select: '-__v'
+    })
+    .populate({
+      path: 'friends',
       select: '-__v'
     })
     .select('-__v')
@@ -72,7 +72,7 @@ router.delete('/:id', ({ params }, res) => {
         res.status(404).json({ message: 'No user found with this id!' });
         return;
       }
-      res.json(dbUserData);
+      res.json({ message: 'User and associated thoughts deleted!' });
     })
     .catch(err => res.status(400).json(err));
 });

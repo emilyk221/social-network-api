@@ -36,7 +36,7 @@ router.post('/', ({ body }, res) => {
       return User.findOneAndUpdate(
         { _id: body.userId },
         { $push: { thoughts: _id } },
-        { new: true }
+        { new: true, runValidators: true }
       );
     })
     .then(dbUserData => {
@@ -65,12 +65,22 @@ router.put('/:id', ({ params, body }, res) => {
 // delete a thought
 router.delete('/:id', ({ params }, res) => {
   Thought.findOneAndDelete({ _id: params.id })
+    .then(deletedThought => {
+      if (!deletedThought) {
+        return res.status(404).json({ message: 'No thought found with this id!' });
+      }
+      return User.findOneAndUpdate(
+        { username: deletedThought.username },
+        { $pull: { thoughts: params.id } },
+        { new: true }
+      );
+    })
     .then(dbThoughtData => {
       if (!dbThoughtData) {
         res.status(404).json({ message: 'No thought found with this id!' });
         return;
       }
-      res.json(dbThoughtData);
+      res.json({ message: 'Thought deleted!' });
     })
     .catch(err => res.status(400).json(err));
 });
